@@ -62,7 +62,8 @@ podAnnotations: {}
 podLabels: {}
 
 securityContext:
-    fsGroup: 1000 #added to enable service-account/pod-iam-role (provide read-access to token)
+  fsGroup: 1000 #added to enable service-account/pod-iam-role (provide read-access to token)
+  # fsGroup: 65534
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
