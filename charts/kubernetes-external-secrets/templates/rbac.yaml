@@ -9,12 +9,6 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["create", "update"]
-  - apiGroups: [""]
-    resources: ["namespaces"]
-    verbs: ["get", "watch", "list"]
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
     verbs: ["create"]
@@ -22,6 +16,23 @@ rules:
     resources: ["customresourcedefinitions"]
     resourceNames: ["externalsecrets.kubernetes-client.io"]
     verbs: ["get", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: {{ include "kubernetes-external-secrets.fullname" . }}-ns-bound
+  labels:
+    app.kubernetes.io/name: {{ include "kubernetes-external-secrets.name" . }}
+    helm.sh/chart: {{ include "kubernetes-external-secrets.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "update"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "watch", "list"]
   - apiGroups: ["kubernetes-client.io"]
     resources: ["externalsecrets"]
     verbs: ["get", "watch", "list"]
@@ -30,9 +41,10 @@ rules:
     verbs: ["get", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: {{ include "kubernetes-external-secrets.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
     app.kubernetes.io/name: {{ include "kubernetes-external-secrets.name" . }}
     helm.sh/chart: {{ include "kubernetes-external-secrets.chart" . }}
@@ -41,7 +53,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "kubernetes-external-secrets.fullname" . }}
+  name: {{ template "kubernetes-external-secrets.fullname" . }}-ns-bound
 subjects:
   - name: {{ template "kubernetes-external-secrets.serviceAccountName" . }}
     namespace: {{ .Release.Namespace | quote }}
@@ -50,7 +62,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "kubernetes-external-secrets.fullname" . }}-auth
+  name: {{ include "kubernetes-external-secrets.fullname" . }}-{{ .Release.Namespace }}-auth
   labels:
     app.kubernetes.io/name: {{ include "kubernetes-external-secrets.name" . }}
     helm.sh/chart: {{ include "kubernetes-external-secrets.chart" . }}
@@ -64,4 +76,22 @@ subjects:
 - name: {{ template "kubernetes-external-secrets.serviceAccountName" . }}
   namespace: {{ .Release.Namespace | quote }}
   kind: ServiceAccount
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "kubernetes-external-secrets.fullname" . }}-{{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "kubernetes-external-secrets.name" . }}
+    helm.sh/chart: {{ include "kubernetes-external-secrets.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "kubernetes-external-secrets.fullname" . }}
+subjects:
+  - name: {{ template "kubernetes-external-secrets.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace | quote }}
+    kind: ServiceAccount
 {{- end -}}
