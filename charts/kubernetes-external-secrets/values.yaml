@@ -61,7 +61,8 @@ fullnameOverride: ""
 podAnnotations: {}
 podLabels: {}
 
-securityContext: {}
+securityContext:
+  fsGroup: 1000 #added to enable service-account/pod-iam-role (provide read-access to token)
   # fsGroup: 65534
 
 resources: {}
