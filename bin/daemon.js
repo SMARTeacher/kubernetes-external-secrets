@@ -22,6 +22,7 @@ const {
   logger,
   metricsPort,
   pollerIntervalMilliseconds,
+  scopeNamespace,
   pollingDisabled,
   rolePermittedAnnotation,
   namingPermittedAnnotation
@@ -38,7 +39,8 @@ async function main () {
   const externalSecretEvents = getExternalSecretEvents({
     kubeClient,
     customResourceManifest,
-    logger
+    logger,
+    scopeNamespace
   })
 
   const registry = Prometheus.register

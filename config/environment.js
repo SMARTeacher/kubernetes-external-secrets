@@ -28,11 +28,14 @@ const namingPermittedAnnotation = process.env.NAMING_PERMITTED_ANNOTATION || 'ex
 
 const metricsPort = process.env.METRICS_PORT || 3001
 
+const scopeNamespace = process.env.SCOPE_NAMESPACE || null
+
 module.exports = {
   vaultEndpoint,
   environment,
   pollerIntervalMilliseconds,
   metricsPort,
+  scopeNamespace,
   rolePermittedAnnotation,
   namingPermittedAnnotation,
   pollingDisabled,
